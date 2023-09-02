@@ -5,6 +5,7 @@ from player import Player
 from stone import Stone
 from dice import Dice
 from home_tile import Home_Tile
+from bar import Bar
 
 successes, failures = pygame.init()
 FPS = 60
@@ -35,11 +36,16 @@ for y in range(2):
             Gameboard.tiles.append(tile)
 
 Gameboard.player1_tile = Home_Tile(
-    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 14), 0, Player1.color, Player1, False
+    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 17), 0, Player1.color, Player1, False
 )
 
 Gameboard.player2_tile = Home_Tile(
-    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 14), Gameboard.SCREEN_HEIGHT, BLACK, Player2.color, True
+    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 17), Gameboard.SCREEN_HEIGHT, BLACK, Player2.color, True
+)
+
+Gameboard.player1_bar = Bar(Gameboard.SCREEN_WIDTH // 2 - Bar.TILE_WIDTH * 1.25 + 2, 0, Player1.color, Player1, False)
+Gameboard.player2_bar = Bar(
+    Gameboard.SCREEN_WIDTH // 2 - Bar.TILE_WIDTH * 1.25 + 2, Gameboard.SCREEN_HEIGHT, Player2.color, Player2, True
 )
 
 # CREATE STONES
