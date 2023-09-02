@@ -7,7 +7,6 @@ from player import Player
 
 class Bar(Tile):
     TILE_WIDTH = Stone.STONE_RADIUS * 2 + 10
-    BORDER_WIDTH = 3
 
     def __init__(self, x_pos: int, y_pos: int, color: pygame.Color, player: Player, inverted: bool):
         super().__init__(x_pos, y_pos, color, inverted)

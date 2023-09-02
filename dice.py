@@ -16,8 +16,8 @@ class Dice:
     MIDDLE = DIM // 2
 
     def __init__(self):
-        self._firstRoll = None
-        self._secondRoll = None
+        self._firstRoll = 1
+        self._secondRoll = 1
 
     def roll(self) -> tuple[int, int]:
         self._firstRoll = random.randint(1, 6)

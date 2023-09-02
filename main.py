@@ -36,12 +36,12 @@ for y in range(2):
             Gameboard.tiles.append(tile)
 
 Gameboard.player1_tile = Home_Tile(
-    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 17), 0, Player1.color, Player1, False
+    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 17), Gameboard.SCREEN_HEIGHT, Player1.color, Player1, True
+)
+Gameboard.player2_tile = Home_Tile(
+    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 17), 0, Player2.color, Player2, False
 )
 
-Gameboard.player2_tile = Home_Tile(
-    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 17), Gameboard.SCREEN_HEIGHT, BLACK, Player2.color, True
-)
 
 Gameboard.player1_bar = Bar(Gameboard.SCREEN_WIDTH // 2 - Bar.TILE_WIDTH * 1.25 + 2, 0, Player1.color, Player1, False)
 Gameboard.player2_bar = Bar(
@@ -63,19 +63,26 @@ for pos, player, count in positions:
     for i in range(count):
         Gameboard.tiles[pos].add_stone(Stone(player))
 
+
 running = True
 while running:
     Gameboard.paint()
+
+    Gameboard.tiles[11].highlight(Gameboard.surface)
+
+    for stone in Gameboard.tiles[11].stones:
+        stone.highlight(Gameboard.surface)
+
+    Dice.paint(
+        Gameboard.surface,
+        Gameboard.SCREEN_WIDTH - Gameboard.SCREEN_WIDTH // 3,
+        Gameboard.SCREEN_HEIGHT // 2.4,
+    )
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             Dice.roll()
-            Dice.paint(
-                Gameboard.surface,
-                Gameboard.SCREEN_WIDTH - Gameboard.SCREEN_WIDTH // 6,
-                Gameboard.SCREEN_HEIGHT // 2.5,
-            )
 
     pygame.display.update()

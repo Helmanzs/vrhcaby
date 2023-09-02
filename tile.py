@@ -5,6 +5,8 @@ from typing import List
 
 class Tile:
     TILE_WIDTH = 85
+    HIGHLIGHT_COLOR = (255, 0, 0)
+    BORDER_WIDTH = 3
 
     def __init__(self, x_pos: int, y_pos: int, color: pygame.Color, inverted: bool):
         self.color = color
@@ -12,11 +14,13 @@ class Tile:
         self.y_pos = y_pos
         self.inverted = inverted
         self.stones: List[Stone] = []
+        self.surface_height = 0
 
     def add_stone(self, stone: Stone):
         self.stones.append(stone)
 
     def paint(self, surface: pygame.surface, surface_height: int):
+        self.surface_height = surface_height
         pygame.draw.polygon(
             surface,
             self.color,
@@ -25,7 +29,7 @@ class Tile:
                 [self.x_pos + self.TILE_WIDTH, self.y_pos],
                 [
                     (self.x_pos + (self.TILE_WIDTH // 2)),
-                    self.y_pos + ((surface_height // 3) * (-1 if self.inverted else 1)),
+                    self.y_pos + ((self.surface_height // 3) * (-1 if self.inverted else 1)),
                 ],
             ],
         )
@@ -44,3 +48,18 @@ class Tile:
                 x_pos,
                 y_pos,
             )
+
+    def highlight(self, surface: pygame.surface):
+        pygame.draw.polygon(
+            surface,
+            self.HIGHLIGHT_COLOR,
+            [
+                [self.x_pos, self.y_pos],
+                [self.x_pos + self.TILE_WIDTH, self.y_pos],
+                [
+                    (self.x_pos + (self.TILE_WIDTH // 2)),
+                    self.y_pos + ((self.surface_height // 3) * (-1 if self.inverted else 1)),
+                ],
+            ],
+            width=self.BORDER_WIDTH,
+        )
