@@ -3,7 +3,7 @@ from typing import List
 from tile import Tile
 
 
-class Gameboard:
+class gameboard:
     SCREEN_WIDTH = 1280
     SCREEN_HEIGHT = 720
     SURFACE_COLOR = (133, 94, 66)
@@ -18,6 +18,18 @@ class Gameboard:
         self.player2_tile = None
         self.player1_bar = None
         self.player2_bar = None
+        self.create_tiles()
+
+    def create_tiles(self):
+        for y in range(2):
+            for x in range(13):
+                if x == 6:
+                    continue
+                color = (86, 50, 50) if (x % 2 == 0 and y == 1) or (x % 2 == 1 and y == 0) else (231, 207, 180)
+                if y == 0:
+                    self.tiles.append(Tile(self.SCREEN_WIDTH - (self.SCREEN_WIDTH // 14) * (x + 2), 0, color, False))
+                else:
+                    self.tiles.append(Tile((self.SCREEN_WIDTH // 14) * x, self.SCREEN_HEIGHT, color, True))
 
     def paint(self):
         for tile in self.tiles:

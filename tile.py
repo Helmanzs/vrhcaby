@@ -15,13 +15,19 @@ class Tile:
         self.inverted = inverted
         self.stones: List[Stone] = []
         self.surface_height = 0
+        self.collider = None
+        self.currentPlayerOwner = None
 
     def add_stone(self, stone: Stone):
         self.stones.append(stone)
+        self.currentPlayerOwner = stone.player
+
+    def get_last_stone(self):
+        return self.stones[-1]
 
     def paint(self, surface: pygame.surface, surface_height: int):
         self.surface_height = surface_height
-        pygame.draw.polygon(
+        self.collider = pygame.draw.polygon(
             surface,
             self.color,
             [
@@ -61,5 +67,5 @@ class Tile:
                     self.y_pos + ((self.surface_height // 3) * (-1 if self.inverted else 1)),
                 ],
             ],
-            width=self.BORDER_WIDTH,
+            width=self.BORDER_WIDTH * 2,
         )

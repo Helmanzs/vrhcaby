@@ -1,11 +1,12 @@
 import pygame
-from gameboard import Gameboard
-from tile import Tile
+from gameboard import gameboard
 from player import Player
 from stone import Stone
 from dice import Dice
 from home_tile import Home_Tile
 from bar import Bar
+from typing import List
+from turn_manager import TurnManager
 
 successes, failures = pygame.init()
 FPS = 60
@@ -15,74 +16,75 @@ clock.tick(FPS)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-Gameboard = Gameboard()
+gameboard = gameboard()
 
-Dice = Dice()
+turn_manager = TurnManager()
+dices: List[Dice] = [Dice(), Dice()]
+players: List[Player] = [Player("WHITE", WHITE), Player("BLACK", BLACK)]
 
-Player1 = Player(WHITE)
-Player2 = Player(BLACK)
-
-# CREATE TILES
-for y in range(2):
-    for x in range(13):
-        if x == 6:
-            continue
-        color = (86, 50, 50) if (x % 2 == 0 and y == 1) or (x % 2 == 1 and y == 0) else (231, 207, 180)
-        if y == 0:
-            tile = Tile(Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 14) * (x + 2), 0, color, False)
-            Gameboard.tiles.append(tile)
-        else:
-            tile = Tile((Gameboard.SCREEN_WIDTH // 14) * x, Gameboard.SCREEN_HEIGHT, color, True)
-            Gameboard.tiles.append(tile)
-
-Gameboard.player1_tile = Home_Tile(
-    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 17), Gameboard.SCREEN_HEIGHT, Player1.color, Player1, True
+gameboard.player1_tile = Home_Tile(
+    gameboard.SCREEN_WIDTH - (gameboard.SCREEN_WIDTH // 17),
+    gameboard.SCREEN_HEIGHT,
+    players[0].color,
+    players[0],
+    True,
 )
-Gameboard.player2_tile = Home_Tile(
-    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 17), 0, Player2.color, Player2, False
+gameboard.player2_tile = Home_Tile(
+    gameboard.SCREEN_WIDTH - (gameboard.SCREEN_WIDTH // 17), 0, players[1].color, players[1], False
 )
 
 
-Gameboard.player1_bar = Bar(Gameboard.SCREEN_WIDTH // 2 - Bar.TILE_WIDTH * 1.25 + 2, 0, Player1.color, Player1, False)
-Gameboard.player2_bar = Bar(
-    Gameboard.SCREEN_WIDTH // 2 - Bar.TILE_WIDTH * 1.25 + 2, Gameboard.SCREEN_HEIGHT, Player2.color, Player2, True
+gameboard.player1_bar = Bar(
+    gameboard.SCREEN_WIDTH // 2 - Bar.TILE_WIDTH * 1.25 + 2, 0, players[0].color, players[0], False
+)
+gameboard.player2_bar = Bar(
+    gameboard.SCREEN_WIDTH // 2 - Bar.TILE_WIDTH * 1.25 + 2,
+    gameboard.SCREEN_HEIGHT,
+    players[1].color,
+    players[1],
+    True,
 )
 
 # CREATE STONES
 positions = [
-    (11, Player1, 5),
-    (12, Player2, 5),
-    (18, Player1, 5),
-    (5, Player2, 5),
-    (16, Player1, 3),
-    (7, Player2, 3),
-    (0, Player1, 2),
-    (23, Player2, 2),
+    (11, players[0], 5),
+    (12, players[1], 5),
+    (18, players[0], 5),
+    (5, players[1], 5),
+    (16, players[0], 3),
+    (7, players[1], 3),
+    (0, players[0], 2),
+    (23, players[1], 2),
+    (22, players[1], 2),
 ]
 for pos, player, count in positions:
     for i in range(count):
-        Gameboard.tiles[pos].add_stone(Stone(player))
+        gameboard.tiles[pos].add_stone(Stone(player))
 
 
 running = True
 while running:
-    Gameboard.paint()
+    gameboard.paint()
 
-    Gameboard.tiles[11].highlight(Gameboard.surface)
-
-    for stone in Gameboard.tiles[11].stones:
-        stone.highlight(Gameboard.surface)
-
-    Dice.paint(
-        Gameboard.surface,
-        Gameboard.SCREEN_WIDTH - Gameboard.SCREEN_WIDTH // 3,
-        Gameboard.SCREEN_HEIGHT // 2.4,
-    )
+    for dice in dices:
+        dice.paint(
+            gameboard.surface,
+            gameboard.SCREEN_WIDTH - gameboard.SCREEN_WIDTH // 3 + (105 * dices.index(dice)),
+            gameboard.SCREEN_HEIGHT // 2.4,
+        )
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
-            Dice.roll()
+            turn_manager.highlight_possible_stones(turn_manager.current_player, gameboard.tiles)
 
     pygame.display.update()
+
+    while not turn_manager.game_started:
+        for dice in dices:
+            dice.highlight(gameboard.surface)
+            pygame.display.update()
+            event = pygame.event.wait()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            turn_manager.roll_for_turn(players, dices)
