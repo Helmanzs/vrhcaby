@@ -3,15 +3,20 @@ from gameboard import Gameboard
 from tile import Tile
 from player import Player
 from stone import Stone
+from dice import Dice
+from home_tile import Home_Tile
 
 successes, failures = pygame.init()
+FPS = 60
+clock = pygame.time.Clock()
+clock.tick(FPS)
+
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 Gameboard = Gameboard()
 
-FPS = 60
-clock = pygame.time.Clock()
-clock.tick(FPS)
+Dice = Dice()
 
 Player1 = Player(WHITE)
 Player2 = Player(BLACK)
@@ -23,11 +28,19 @@ for y in range(2):
             continue
         color = (86, 50, 50) if (x % 2 == 0 and y == 1) or (x % 2 == 1 and y == 0) else (231, 207, 180)
         if y == 0:
-            tile = Tile(Gameboard.screen_width - (Gameboard.screen_width // 13) * (x + 1), 0, color, False)
+            tile = Tile(Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 14) * (x + 2), 0, color, False)
             Gameboard.tiles.append(tile)
         else:
-            tile = Tile((Gameboard.screen_width // 13) * x, Gameboard.screen_height, color, True)
+            tile = Tile((Gameboard.SCREEN_WIDTH // 14) * x, Gameboard.SCREEN_HEIGHT, color, True)
             Gameboard.tiles.append(tile)
+
+Gameboard.player1_tile = Home_Tile(
+    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 14), 0, Player1.color, Player1, False
+)
+
+Gameboard.player2_tile = Home_Tile(
+    Gameboard.SCREEN_WIDTH - (Gameboard.SCREEN_WIDTH // 14), Gameboard.SCREEN_HEIGHT, BLACK, Player2.color, True
+)
 
 # CREATE STONES
 positions = [
@@ -46,8 +59,17 @@ for pos, player, count in positions:
 
 running = True
 while running:
+    Gameboard.paint()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    Gameboard.paint()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            Dice.roll()
+            Dice.paint(
+                Gameboard.surface,
+                Gameboard.SCREEN_WIDTH - Gameboard.SCREEN_WIDTH // 6,
+                Gameboard.SCREEN_HEIGHT // 2.5,
+            )
+
     pygame.display.update()

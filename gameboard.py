@@ -1,19 +1,24 @@
 import pygame
+from typing import List
+from tile import Tile
 
 
 class Gameboard:
-    screen_width = 1280
-    screen_height = 720
-    base_margin = 30
-    box_color = (171, 117, 46)
-    surface_color = (247, 236, 200)
+    SCREEN_WIDTH = 1280
+    SCREEN_HEIGHT = 720
+    BASE_MARGIN = 30
+    SURFACE_COLOR = (171, 117, 46)
 
     def __init__(self):
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        self.screen.fill(self.box_color)
+        self.surface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        self.surface.fill(self.SURFACE_COLOR)
         self.game_over = False
-        self.tiles = []
+        self.tiles: List[Tile] = []
+        self.player1_tile = None
+        self.player2_tile = None
 
     def paint(self):
         for tile in self.tiles:
-            tile.paint(self.screen, self.screen_height)
+            tile.paint(self.surface, self.SCREEN_HEIGHT)
+        self.player1_tile.paint(self.surface, self.SCREEN_HEIGHT)
+        self.player2_tile.paint(self.surface, self.SCREEN_HEIGHT)
