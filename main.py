@@ -18,7 +18,7 @@ BLACK = (0, 0, 0)
 gameboard = gameboard()
 
 players: List[Player] = [Player("WHITE", WHITE), Player("BLACK", BLACK)]
-turn_manager = TurnManager(players)
+turn_manager = TurnManager(players, gameboard.tiles)
 dices: List[Dice] = [Dice(), Dice()]
 
 gameboard.player1_tile = Home_Tile(
@@ -63,20 +63,15 @@ mouse_pos = None
 running = True
 while running:
     gameboard.paint()
-
-    if turn_manager.game_started and turn_manager.selected_stone is None:
-        turn_manager.highlight_possible_stones(turn_manager.current_player, gameboard.tiles)
-
-        for tile in turn_manager.possible_moves:
-            tile.is_highlighted = False
-        turn_manager.possible_moves = []
-
     for dice in dices:
         dice.paint(
             gameboard.surface,
             gameboard.SCREEN_WIDTH - gameboard.SCREEN_WIDTH // 3 + (105 * dices.index(dice)),
             gameboard.SCREEN_HEIGHT // 2.4,
         )
+
+    if turn_manager.game_started and turn_manager.selected_stone is None and len(turn_manager.highlighted_stones) == 0:
+        turn_manager.highlight_possible_stones(turn_manager.current_player)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -91,19 +86,27 @@ while running:
                             turn_manager.selected_stone = tile.get_last_stone()
                             turn_manager.selected_tile = tile if turn_manager.selected_stone is not None else None
                             turn_manager.unhighlight()
+                        else:
+                            break
 
                 if turn_manager.selected_stone is not None:
-                    turn_manager.highlight_moves(dices, gameboard.tiles)
+                    turn_manager.highlight_moves()
             else:
                 for tile in turn_manager.possible_moves:
                     if tile.collider.collidepoint(mouse_pos):
-                        tile.add_stone(turn_manager.selected_tile.stones.pop())
-                        turn_manager.selected_stone = None
-                        turn_manager.selected_tile = None
+                        turn_manager.move_stone(tile)
+                        break
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-            turn_manager.selected_stone = None
-            turn_manager.selected_tile = None
+            for tile in turn_manager.possible_moves:
+                tile.is_highlighted = False
+            turn_manager.possible_moves = []
+            turn_manager.clear()
+
+    if len(turn_manager.available_dices) == 0:
+        turn_manager.new_turn(dices.copy())
+        for dice in dices:
+            dice.roll_dice()
 
     pygame.display.update()
 

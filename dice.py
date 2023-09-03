@@ -4,6 +4,7 @@ import random
 
 class Dice:
     FILL = (242, 238, 203)
+    FADED = (160, 156, 121)
     BORDER = (0, 0, 0)
     BLACK = (0, 0, 0)
     HIGHLIGHT_COLOR = (255, 0, 0)
@@ -23,6 +24,7 @@ class Dice:
         self.roll = 1
         self.x_pos = 0
         self.y_pos = 0
+        self.is_faded = False
 
     def roll_dice(self):
         self.roll = random.randint(1, 6)
@@ -40,9 +42,10 @@ class Dice:
             border_radius=self.BORDER_RADIUS,
             width=self.BORDER_WIDTH,
         )
+        fill_color = self.FADED if self.is_faded else self.FILL
         pygame.draw.rect(
             surface,
-            self.FILL,
+            fill_color,
             pygame.Rect(self.x_pos, self.y_pos, self.DIM, self.DIM),
             border_radius=self.BORDER_RADIUS,
         )
