@@ -7,6 +7,7 @@ from home_tile import Home_Tile
 from bar import Bar
 from typing import List
 from turn_manager import TurnManager
+from center_bar import Center_Bar
 
 successes, failures = pygame.init()
 FPS = 60
@@ -32,7 +33,6 @@ gameboard.player2_tile = Home_Tile(
     gameboard.SCREEN_WIDTH - (gameboard.SCREEN_WIDTH // 17), 0, players[1].color, players[1], False
 )
 
-
 gameboard.player1_bar = Bar(
     gameboard.SCREEN_WIDTH // 2 - Bar.TILE_WIDTH * 1.25 + 2, 0, players[0].color, players[0], False
 )
@@ -43,6 +43,14 @@ gameboard.player2_bar = Bar(
     players[1],
     True,
 )
+
+
+players[0].home_tile = gameboard.player1_tile
+players[1].home_tile = gameboard.player2_tile
+players[0].bar_tile = gameboard.player1_bar
+players[1].bar_tile = gameboard.player2_bar
+
+turn_manager.center_bar = Center_Bar(gameboard.SCREEN_WIDTH // 2 - 40, gameboard.SCREEN_HEIGHT // 2, None, None, False)
 
 # CREATE STONES
 positions = [
@@ -63,6 +71,8 @@ mouse_pos = None
 running = True
 while running:
     gameboard.paint()
+    turn_manager.center_bar.paint(gameboard.surface)
+
     for dice in dices:
         dice.paint(
             gameboard.surface,
@@ -72,7 +82,7 @@ while running:
 
     if turn_manager.game_started and turn_manager.selected_stone is None and len(turn_manager.highlighted_stones) == 0:
         turn_manager.highlight_possible_stones(turn_manager.current_player)
-
+    print(turn_manager.possible_moves)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
