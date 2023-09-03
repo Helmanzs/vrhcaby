@@ -17,13 +17,16 @@ class Tile:
         self.surface_height = 0
         self.collider = None
         self.currentPlayerOwner = None
+        self.is_highlighted = False
 
     def add_stone(self, stone: Stone):
         self.stones.append(stone)
         self.currentPlayerOwner = stone.player
 
     def get_last_stone(self):
-        return self.stones[-1]
+        if len(self.stones) != 0:
+            return self.stones[-1]
+        return None
 
     def paint(self, surface: pygame.surface, surface_height: int):
         self.surface_height = surface_height
@@ -54,6 +57,8 @@ class Tile:
                 x_pos,
                 y_pos,
             )
+        if self.is_highlighted:
+            self.highlight(surface)
 
     def highlight(self, surface: pygame.surface):
         pygame.draw.polygon(

@@ -8,6 +8,7 @@ class Stone:
     BORDER_WIDTH = 4
 
     def __init__(self, player: Player):
+        self.collider = None
         self.player = player
         self.color = player.color
         self.x_pos = 0
@@ -17,7 +18,7 @@ class Stone:
     def paint(self, surface: pygame.surface, x_pos: int, y_pos: int):
         self.x_pos = x_pos
         self.y_pos = y_pos
-        pygame.draw.circle(surface, self.color, (self.x_pos, self.y_pos), self.STONE_RADIUS)
+        self.collider = pygame.draw.circle(surface, self.color, (self.x_pos, self.y_pos), self.STONE_RADIUS)
         if self.is_highlighted:
             self.highlight(surface)
 
@@ -29,6 +30,6 @@ class Stone:
             surface,
             self.HIGHLIGHT_COLOR,
             (self.x_pos, self.y_pos),
-            self.STONE_RADIUS + self.BORDER_WIDTH,
+            self.STONE_RADIUS + self.BORDER_WIDTH - 1,
             width=self.BORDER_WIDTH,
         )

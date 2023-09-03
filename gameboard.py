@@ -32,6 +32,8 @@ class gameboard:
                     self.tiles.append(Tile((self.SCREEN_WIDTH // 14) * x, self.SCREEN_HEIGHT, color, True))
 
     def paint(self):
+        self.surface.fill(self.SURFACE_COLOR)
+
         for tile in self.tiles:
             tile.paint(self.surface, self.SCREEN_HEIGHT)
 
