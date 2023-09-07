@@ -1,43 +1,50 @@
-from player import Player
-from dice import Dice
 from typing import List
-from tile import Tile
-from stone import Stone
+from gameboard import Gameboard
+from objects.player import Player
+from objects.dice import Dice
+from objects.tile import Tile
+from objects.stone import Stone
 
 
 class TurnManager:
-    def __init__(self, players: List[Player], tiles: List[Tile]):
-        self.players: List[Player] = players
+    def __init__(self, gameboard: Gameboard):
+        self.gameboard = gameboard
+        self.current_player: Player = None
         self.available_dices: List[Dice] = []
-        self.game_started = False
-        self.selected_stone = None
-        self.selected_tile = None
-        self.current_player = None
+        self.selected_stone: Stone = None
+        self.selected_tile: Tile = None
         self.possible_moves: List[Tile] = []
         self.highlighted_stones: List[Stone] = []
-        self.tiles: List[Tile] = tiles
         self.center_bar = None
+        self._game_started: bool = False
 
-    def roll_for_turn(self, players: List[Player], dices: List[Dice]) -> Player:
+    @property
+    def game_started(self):
+        return self._game_started
+
+    @game_started.setter
+    def game_started(self, value: bool):
+        self._game_started = value
+        for dice in self.available_dices:
+            dice.is_highlighted = not value
+
+    def roll_for_turn(self, dices: List[Dice]):
         for dice in dices:
             dice.roll_dice()
 
         if dices[0].roll > dices[1].roll:
-            self.current_player = players[0]
+            self.current_player = self.gameboard.player1
         else:
-            self.current_player = players[1]
+            self.current_player = self.gameboard.player2
         self.game_started = True
 
     def new_turn(self, dices: List[Dice]):
-        if len(self.center_bar.stones) != 0:
-            # self.current_player.bar_tile.add_stone(self.center_bar.pop())
-            # self.center_bar.currentPlayerOwner = None
-            ...
-
         self.available_dices = dices
         for dice in self.available_dices:
             dice.is_faded = False
-        self.current_player = self.players[0] if self.current_player == self.players[1] else self.players[1]
+        self.current_player = (
+            self.gameboard.player1 if self.current_player == self.gameboard.player2 else self.gameboard.player2
+        )
 
     def move_stone(self, target_tile: Tile):
         roll = self.calculate_roll(target_tile)
@@ -48,45 +55,39 @@ class TurnManager:
                 dice.is_faded = True
                 break
 
-        if len(target_tile.stones) == 1 and target_tile.currentPlayerOwner is not self.current_player:
-            stone = target_tile.stones.pop(0)
-            if self.current_player == self.players[0]:
-                self.players[1].bar_tile.add_stone(stone)
+        if len(target_tile.stones) == 1 and target_tile.current_player_owner is not self.current_player:
+            stone = target_tile.pop_stone()
+
+            if self.current_player == self.gameboard.player1:
+                self.gameboard.player2.bar_tile.add_stone(stone)
             else:
-                self.players[0].bar_tile.add_stone(stone)
-            target_tile.add_stone(self.selected_tile.stones.pop())
+                self.gameboard.player1.bar_tile.add_stone(stone)
+
+            target_tile.add_stone(self.selected_tile.pop_stone())
 
         else:
-            target_tile.add_stone(self.selected_tile.stones.pop())
+            target_tile.add_stone(self.selected_tile.pop_stone())
 
         self.clear()
 
     def calculate_roll(self, tile: Tile):
-        target_tile = self.tiles.index(tile)
-        source_tile = self.tiles.index(self.selected_tile)
+        target_tile = self.gameboard.tiles.index(tile)
+        source_tile = self.gameboard.tiles.index(self.selected_tile)
 
         if target_tile < source_tile:
             return source_tile - target_tile
         else:
             return target_tile - source_tile
 
-    def highlight_possible_stones(self, player: Player):
-        if len(self.current_player.bar_tile.stones) != 0:
-            # self.center_bar.stones[0].is_highlighted = True
-            # self.highlighted_stones.append(self.center_bar.stones[0])
-            # self.selected_stone = self.center_bar.stones[0]
-            # self.selected_tile = self.center_bar
-            # return
-            ...
-
+    def highlight_possible_stones(self):
         filtered_tiles: List[Tile] = []
-        for tile in self.tiles:
-            if tile.currentPlayerOwner == player:
+        for tile in self.gameboard.tiles:
+            if tile.current_player_owner == self.current_player:
                 filtered_tiles.append(tile)
 
         for tile in filtered_tiles:
             if len(tile.stones) != 0:
-                last_stone = tile.get_last_stone()
+                last_stone = tile.get_stone()
                 last_stone.is_highlighted = True
                 if last_stone not in self.highlighted_stones:
                     self.highlighted_stones.append(last_stone)
@@ -95,45 +96,34 @@ class TurnManager:
         movable_tiles: List[Tile] = self.get_movable_tiles()
 
         for dice in self.available_dices:
-            index = self.get_safe_index(self.tiles.index(self.selected_tile), dice.roll)
+            index = self.get_safe_index(self.gameboard.tiles.index(self.selected_tile), dice.roll)
             if index is not None:
-                if self.tiles[index] in movable_tiles:
-                    self.possible_moves.append(self.tiles[index])
+                if self.gameboard.tiles[index] in movable_tiles:
+                    self.possible_moves.append(self.gameboard.tiles[index])
                     index = None
 
         for tile in self.possible_moves:
             tile.is_highlighted = True
 
     def get_safe_index(self, current_index: int, roll: int) -> int:
-        next_index = current_index + (roll * (-1 if self.current_player == self.players[1] else 1))
+        next_index = current_index + (roll * (-1 if self.current_player == self.gameboard.player2 else 1))
         if next_index >= 24 or next_index < 0:
             return None
         return next_index
 
     def get_movable_tiles(self) -> List[Tile]:
-        indexes = []
+        indexes: List[int] = []
         movable_tiles: List[Tile] = []
-        # if len(self.center_bar.stones) != 0:
-        #    roll = 0
-        #    for dice in self.available_dices:
-        #        if dice.roll > roll:
-        #            roll = dice.roll
-
-        #    if self.players[0] == self.current_player:
-        #        indexes = self.tiles[0:roll]
-        #    else:
-        #        indexes = self.tiles[24 - roll : roll]
-        # else:
-        if self.players[0] == self.current_player:
-            indexes = self.tiles[self.tiles.index(self.selected_tile) + 1 :]
+        if self.gameboard.player1 == self.current_player:
+            indexes = self.gameboard.tiles[self.gameboard.tiles.index(self.selected_tile) + 1 :]
         else:
-            indexes = self.tiles[0 : self.tiles.index(self.selected_tile)]
+            indexes = self.gameboard.tiles[0 : self.gameboard.tiles.index(self.selected_tile)]
 
         for tile in indexes:
             if tile not in movable_tiles:
                 if len(tile.stones) <= 1:
                     movable_tiles.append(tile)
-                elif tile.currentPlayerOwner is self.current_player:
+                elif tile.current_player_owner is self.current_player:
                     movable_tiles.append(tile)
 
         return movable_tiles
