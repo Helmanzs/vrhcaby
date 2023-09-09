@@ -3,10 +3,12 @@ import pygame
 
 class Player:
     def __init__(self, name: str, color: pygame.Color):
+        from objects.bar import Bar
+
         self._name: str = name
         self._color: pygame.Color = color
-        self._home_tile = None
-        self._bar_tile = None
+        self._home_tile: Bar = None
+        self._bar_tile: Bar = None
 
     @property
     def name(self):

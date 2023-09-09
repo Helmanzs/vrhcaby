@@ -22,7 +22,7 @@ class Gameboard:
         self.game_over = False
         self.tiles: List[Tile] = []
         self.dices: List[Dice] = [Dice(), Dice()]
-        self.center_bar: Bar = None
+        self.center_bar: Center_Bar = None
         self.player1: Player = player1
         self.player2: Player = player2
         self.create_tiles()
