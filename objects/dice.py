@@ -23,11 +23,12 @@ class Dice:
     MIDDLE = DIM // 2
 
     def __init__(self):
-        self._roll = 1
+        self._roll: int = 1
         self._position: namedtuple = None
-        self._is_faded = False
-        self._is_highlighted = False
-        self._paint_functions = {
+        self._is_faded: bool = False
+        self._is_highlighted: bool = False
+        self._collider: pygame.Rect = None
+        self._paint_functions: dict[int, callable] = {
             1: self.__paint_one,
             2: self.__paint_two,
             3: self.__paint_three,
@@ -56,6 +57,10 @@ class Dice:
     def is_highlighted(self, value: bool):
         self._is_highlighted = value
 
+    @property
+    def collider(self):
+        return self._collider
+
     def roll_dice(self) -> int:
         self._roll = random.randint(1, 6)
         return self._roll
@@ -65,7 +70,7 @@ class Dice:
         self.__paint_dice(surface)
 
     def __paint_dice(self, surface: pygame.surface):
-        pygame.draw.rect(
+        self._collider = pygame.draw.rect(
             surface,
             self.BORDER,
             pygame.Rect(self._position.x - 2, self._position.y - 2, self.DIM + 4, self.DIM + 4),

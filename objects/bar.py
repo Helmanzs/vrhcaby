@@ -19,7 +19,7 @@ class Bar(Tile):
         self.__paint_stone(surface)
 
     def __paint_tile(self, surface: pygame.surface):
-        pygame.draw.rect(
+        self._collider = pygame.draw.rect(
             surface,
             self._current_player_owner.color,
             pygame.Rect(
@@ -31,6 +31,9 @@ class Bar(Tile):
             width=self.BORDER_WIDTH,
         )
 
+        if self.is_highlighted:
+            self.__highlight(surface)
+
     def __paint_stone(self, surface: pygame.Surface):
         for stone in self.stones:
             x_pos = self.position.x + 5
@@ -39,3 +42,16 @@ class Bar(Tile):
             )
 
             stone.paint_stone_in_home(surface, (x_pos, y_pos))
+
+    def __highlight(self, surface: pygame.Surface):
+        pygame.draw.rect(
+            surface,
+            self.HIGHLIGHT_COLOR,
+            pygame.Rect(
+                self.position.x,
+                0 if self.position.y == 0 else self.position.y - (surface.get_height() // 3),
+                self.TILE_WIDTH,
+                surface.get_height() // 3,
+            ),
+            width=self.BORDER_WIDTH,
+        )
