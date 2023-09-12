@@ -1,10 +1,11 @@
 import pygame
 from collections import namedtuple
+from objects.tile import Tile
 from objects.player import Player
 from objects.stone import Stone
 
 
-class Center_Bar:
+class Center_Bar(Tile):
     BORDER_WIDTH = 4
 
     def __init__(self, position: tuple[int, int]):
@@ -33,6 +34,7 @@ class Center_Bar:
 
     def paint(self, surface: pygame.surface):
         if self.stone is None:
+            self._collider = None
             return
 
         self._collider = pygame.draw.rect(

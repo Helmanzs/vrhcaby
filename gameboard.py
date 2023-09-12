@@ -78,27 +78,17 @@ class Gameboard:
             # (11, self.player1, 5),
             # (12, self.player2, 5),
             # (18, self.player1, 5),
-            # (5, self.player2, 5),
+            (5, self.player2, 15),
             # (16, self.player1, 3),
             # (7, self.player2, 3),
             # (0, self.player1, 2),
             # (23, self.player2, 2),
-            # (18, self.player1, 3),
-            (19, self.player1, 3),
-            (20, self.player1, 3),
-            (21, self.player1, 3),
-            (22, self.player1, 3),
-            (23, self.player1, 3),
-            (0, self.player2, 3),
-            (1, self.player2, 3),
-            (2, self.player2, 3),
-            (3, self.player2, 3),
-            (4, self.player2, 3),
-            # (5, self.player2, 3),
         ]
         for pos, player, count in positions:
             for i in range(count):
                 self.tiles[pos].add_stone(Stone(player))
+
+        self.player1.bar_tile.add_stone(Stone(self.player1))
 
     def paint(self):
         self.surface.fill(self.SURFACE_COLOR)

@@ -22,6 +22,16 @@ class Backgammon:
         self.turn_manager._center_bar = self.gameboard.center_bar
         self.game_running = True
 
+    def check_for_winner(self):
+        player_won = self.turn_manager.check_for_win()
+        if player_won is not None:
+            answer = askyesno(title="Confirmation", message=f"{player_won.name} won! \nDo you want to play again?")
+            if answer:
+                self.reset()
+            else:
+                pygame.quit()
+                sys.exit()
+
     def run(self):
         mouse_pos = (0, 0)
         while self.game_running:
@@ -40,6 +50,7 @@ class Backgammon:
 
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
+
                     if self.turn_manager.selected_stone is None:
                         if self.gameboard.center_bar.stone is None:
                             for tile in self.gameboard.tiles:
@@ -47,19 +58,20 @@ class Backgammon:
                                     if tile.current_player_owner == self.turn_manager.current_player:
                                         if tile not in self.turn_manager.no_longer_possible_tiles:
                                             self.turn_manager.selected_stone = tile.get_stone()
-                                            self.turn_manager.selected_tile = (
-                                                tile if self.turn_manager.selected_stone is not None else None
-                                            )
+                                            self.turn_manager.selected_tile = tile
                                             self.turn_manager.unhighlight()
-                                    else:
-                                        break
+
                         else:
                             if self.gameboard.center_bar.collider is not None:
                                 if self.gameboard.center_bar.collider.collidepoint(mouse_pos):
-                                    self.turn_manager.selected_stone = self.gameboard.center_bar.stone
+                                    if tile not in self.turn_manager.no_longer_possible_tiles:
+                                        self.turn_manager.selected_stone = self.gameboard.center_bar.stone
+                                        self.turn_manager.selected_tile = self.gameboard.center_bar
+                                        self.turn_manager.unhighlight()
 
                         if self.turn_manager.selected_stone is not None:
                             self.turn_manager.highlight_moves()
+
                     else:
                         for tile in self.turn_manager.possible_moves:
                             if tile.collider.collidepoint(mouse_pos):
@@ -70,9 +82,7 @@ class Backgammon:
                     if self.turn_manager.selected_tile is not None:
                         if not self.turn_manager.possible_moves:
                             self.turn_manager.no_longer_possible_tiles.append(self.turn_manager.selected_tile)
-                    for tile in self.turn_manager.possible_moves:
-                        tile.is_highlighted = False
-                    self.turn_manager.possible_moves = []
+
                     self.turn_manager.clear()
 
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 2:
@@ -83,21 +93,12 @@ class Backgammon:
 
             if len(self.turn_manager.available_dices) == 0:
                 self.turn_manager.new_turn(self.gameboard.dices.copy())
-                for dice in self.gameboard.dices:
-                    dice.roll_dice()
 
-            player_won = self.turn_manager.check_for_win()
-            if player_won is not None:
-                answer = askyesno(title="Confirmation", message=f"{player_won.name} won! \nDo you want to play again?")
-                if answer:
-                    self.reset()
-                else:
-                    pygame.quit()
-                    sys.exit()
+            self.check_for_winner()
 
             pygame.display.update()
 
-            while not self.turn_manager.game_started:
+            if not self.turn_manager.game_started:
                 for dice in self.gameboard.dices:
                     self.gameboard.paint()
                     pygame.display.update()

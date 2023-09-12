@@ -46,6 +46,7 @@ class TurnManager:
         self.available_dices = dices
         for dice in self.available_dices:
             dice.is_faded = False
+            dice.roll_dice
         self.current_player = (
             self.gameboard.player1 if self.current_player == self.gameboard.player2 else self.gameboard.player2
         )
@@ -133,8 +134,7 @@ class TurnManager:
 
     def highlight_possible_stones(self):
         if self.gameboard.center_bar.stone is not None:
-            self.gameboard.center_bar.stone.is_highlighted = True
-            self.highlighted_stones.append(self.gameboard.center_bar.stone)
+            self.highlight_center_stone()
             return
 
         filtered_tiles: List[Tile] = []
@@ -152,8 +152,20 @@ class TurnManager:
 
         if not self.highlighted_stones:
             self.new_turn(self.gameboard.dices.copy())
-            for dice in self.gameboard.dices:
-                dice.roll_dice()
+
+    def highlight_center_stone(self):
+        if self.gameboard.center_bar not in self.no_longer_possible_tiles:
+            self.gameboard.center_bar.stone.is_highlighted = True
+            self.highlighted_stones.append(self.gameboard.center_bar.stone)
+
+        if not self.highlighted_stones:
+            stone = self.gameboard.center_bar.pop_stone()
+            if self.current_player is self.gameboard.player1:
+                self.gameboard.player1.bar_tile.add_stone(stone)
+            else:
+                self.gameboard.player2.bar_tile.add_stone(stone)
+
+            self.new_turn(self.gameboard.dices.copy())
 
     def highlight_moves(self):
         movable_tiles: List[Tile] = self.get_movable_tiles()
@@ -214,10 +226,10 @@ class TurnManager:
         return movable_tiles
 
     def check_for_win(self) -> Player:
-        if len(self.gameboard.player1.home_tile.stones) == 1:
+        if len(self.gameboard.player1.home_tile.stones) == 15:
             return self.gameboard.player1
 
-        if len(self.gameboard.player2.home_tile.stones) == 1:
+        if len(self.gameboard.player2.home_tile.stones) == 15:
             return self.gameboard.player2
 
         return None

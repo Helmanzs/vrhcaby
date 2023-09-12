@@ -62,7 +62,7 @@ class Dice:
         return self._collider
 
     def roll_dice(self) -> int:
-        self._roll = random.randint(1, 6)
+        self._roll = random.randint(6, 6)
         return self._roll
 
     def paint(self, surface: pygame.surface, position: tuple[int, int]):
